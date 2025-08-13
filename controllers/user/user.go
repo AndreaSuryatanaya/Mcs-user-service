@@ -12,7 +12,7 @@ import (
 )
 
 type UserController struct {
-	services services.IServiceRegistry
+	service services.IServiceRegistry
 }
 
 type IUserController interface {
@@ -24,7 +24,7 @@ type IUserController interface {
 }
 
 func NewUserController(service services.IServiceRegistry) IUserController {
-	return &UserController{service, service}
+	return &UserController{service: service}
 }
 
 func (u *UserController) Login(ctx *gin.Context) {
@@ -55,7 +55,7 @@ func (u *UserController) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := u.services.GetUser().Login(ctx, request)
+	user, err := u.service.GetUser().Login(ctx, request)
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{
 			Code: http.StatusBadRequest,
@@ -101,7 +101,7 @@ func (u *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	user, err := u.services.GetUser().Register(ctx, request)
+	user, err := u.service.GetUser().Register(ctx, request)
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{
 			Code: http.StatusBadRequest,
@@ -147,7 +147,7 @@ func (u *UserController) Update(ctx *gin.Context) {
 		return
 	}
 
-	user, err := u.services.GetUser().Update(ctx, request, uuid)
+	user, err := u.service.GetUser().Update(ctx, request, uuid)
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{
 			Code: http.StatusBadRequest,
@@ -165,7 +165,7 @@ func (u *UserController) Update(ctx *gin.Context) {
 }
 
 func (u *UserController) GetUserLogin(ctx *gin.Context) {
-	user, err := u.services.GetUser().GetUserLogin(ctx.Request.Context())
+	user, err := u.service.GetUser().GetUserLogin(ctx.Request.Context())
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{
 			Code: http.StatusBadRequest,
@@ -183,7 +183,7 @@ func (u *UserController) GetUserLogin(ctx *gin.Context) {
 }
 
 func (u *UserController) GetUserByUUID(ctx *gin.Context) {
-	user, err := u.services.GetUser().GetUserByUUID(ctx.Request.Context(), ctx.Param("uuid"))
+	user, err := u.service.GetUser().GetUserByUUID(ctx.Request.Context(), ctx.Param("uuid"))
 	if err != nil {
 		response.HttpResponse(response.ParamHTTPResp{
 			Code: http.StatusBadRequest,
