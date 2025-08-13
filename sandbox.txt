@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'setup:common/error.go'
+git commit -m 'setup:common/util.go set read consul KV'
 git push origin main
