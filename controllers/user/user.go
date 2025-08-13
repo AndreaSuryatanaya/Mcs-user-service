@@ -163,3 +163,39 @@ func (u *UserController) Update(ctx *gin.Context) {
 		Gin:  ctx,
 	})
 }
+
+func (u *UserController) GetUserLogin(ctx *gin.Context) {
+	user, err := u.services.GetUser().GetUserLogin(ctx.Request.Context())
+	if err != nil {
+		response.HttpResponse(response.ParamHTTPResp{
+			Code: http.StatusBadRequest,
+			Err:  err,
+			Gin:  ctx,
+		})
+		return
+	}
+
+	response.HttpResponse(response.ParamHTTPResp{
+		Code: http.StatusOK,
+		Data: user,
+		Gin:  ctx,
+	})
+}
+
+func (u *UserController) GetUserByUUID(ctx *gin.Context) {
+	user, err := u.services.GetUser().GetUserByUUID(ctx.Request.Context(), ctx.Param("uuid"))
+	if err != nil {
+		response.HttpResponse(response.ParamHTTPResp{
+			Code: http.StatusBadRequest,
+			Err:  err,
+			Gin:  ctx,
+		})
+		return
+	}
+
+	response.HttpResponse(response.ParamHTTPResp{
+		Code: http.StatusOK,
+		Data: user,
+		Gin:  ctx,
+	})
+}
