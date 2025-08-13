@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'setup:model for role & user'
+git commit -m 'setup:dto for user'
 git push origin main
