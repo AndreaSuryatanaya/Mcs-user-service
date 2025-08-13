@@ -17,7 +17,7 @@ import (
 )
 
 type UserService struct {
-	repository repositories.IRepositoryRegisty
+	repository repositories.IRepositoryRegistry
 }
 
 type IUserService interface {
@@ -33,7 +33,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func NewUserService(repository repositories.IRepositoryRegisty) IUserService {
+func NewUserService(repository repositories.IRepositoryRegistry) IUserService {
 	return &UserService{repository: repository}
 }
 

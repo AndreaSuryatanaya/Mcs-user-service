@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'setup:seeder registry, role, user'
+git commit -m 'service: create func update user'
 git push origin main

@@ -10,11 +10,11 @@ type Registry struct {
 	db *gorm.DB
 }
 
-type IRepositoryRegisty interface {
+type IRepositoryRegistry interface {
 	GetUser() repositories.IUserRepository
 }
 
-func NewRepositoryRegistry(db *gorm.DB) IRepositoryRegisty {
+func NewRepositoryRegistry(db *gorm.DB) IRepositoryRegistry {
 	return &Registry{db: db}
 }
 
