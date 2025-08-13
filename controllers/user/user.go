@@ -117,3 +117,49 @@ func (u *UserController) Register(ctx *gin.Context) {
 		Gin:  ctx,
 	})
 }
+
+func (u *UserController) Update(ctx *gin.Context) {
+	request := &dto.UpdateRequest{}
+	uuid := ctx.Param("uuid")
+
+	err := ctx.ShouldBindJSON(request)
+	if err != nil {
+		response.HttpResponse(response.ParamHTTPResp{
+			Code: http.StatusBadRequest,
+			Err:  err,
+			Gin:  ctx,
+		})
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(request)
+	if err != nil {
+		errMessage := http.StatusText(http.StatusUnprocessableEntity)
+		errResponse := errWrap.ErrValidationResponse(err)
+		response.HttpResponse(response.ParamHTTPResp{
+			Code:    http.StatusUnprocessableEntity,
+			Message: &errMessage,
+			Data:    errResponse,
+			Err:     err,
+			Gin:     ctx,
+		})
+		return
+	}
+
+	user, err := u.services.GetUser().Update(ctx, request, uuid)
+	if err != nil {
+		response.HttpResponse(response.ParamHTTPResp{
+			Code: http.StatusBadRequest,
+			Err:  err,
+			Gin:  ctx,
+		})
+		return
+	}
+
+	response.HttpResponse(response.ParamHTTPResp{
+		Code: http.StatusOK,
+		Data: user,
+		Gin:  ctx,
+	})
+}
