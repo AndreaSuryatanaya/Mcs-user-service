@@ -1,31 +1,20 @@
 package seeders
 
-import (
-	"user-service/domain/models"
+import "gorm.io/gorm"
 
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-)
+type Registry struct {
+	db *gorm.DB
+}
 
-func RunRoleSeeder(db *gorm.DB) {
-	roles := []models.Role{
-		{
-			Code: "ADMIN",
-			Name: "Administrator",
-		},
-		{
-			Code: "CUSTOMER",
-			Name: "Customer",
-		},
-	}
+type ISeederRegistry interface {
+	Run()
+}
 
-	for _, role := range roles {
-		err := db.FirstOrCreate(&role, models.Role{Code: role.Code}).Error
-		if err != nil {
-			logrus.Errorf("failed to seed role : %v", err)
-			panic(err)
-		}
+func NewSeederRegistry(db *gorm.DB) ISeederRegistry {
+	return &Registry{db: db}
+}
 
-		logrus.Infof("role %s successfully seeded", role.Code)
-	}
+func (s *Registry) Run() {
+	RunRoleSeeder(s.db)
+	RunUserSeeder(s.db)
 }
