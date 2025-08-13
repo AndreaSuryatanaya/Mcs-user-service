@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'setup:dto for user'
+git commit -m 'setup:seeder registry, role, user'
 git push origin main
