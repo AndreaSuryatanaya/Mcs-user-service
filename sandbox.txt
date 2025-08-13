@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'setup:error/general.go'
+git commit -m 'setup:common/error.go'
 git push origin main
