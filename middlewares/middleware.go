@@ -120,7 +120,7 @@ func Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
 		token := c.GetHeader(constants.Authorization)
-		if token != "" {
+		if token == "" {
 			responseUnauthorized(c, errConstant.ErrUnauthorized.Error())
 			return
 		}

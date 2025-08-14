@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'routes: create all routing for user'
+git commit -m 'setup:cmd/main.go dan connect to main.go in root'
 git push origin main
