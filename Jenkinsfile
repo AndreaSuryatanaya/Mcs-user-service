@@ -63,6 +63,8 @@ pipeline {
               [url: repoUrl, credentialsId: 'github-credential']
             ]
           ])
+
+          sh 'ls -lah'
         }
       }
     }
