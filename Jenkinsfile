@@ -15,6 +15,35 @@ pipeline {
   }
 
   stages {
+    stage('Debug Environment Variables') {
+      steps {
+        script {
+          echo "=== Jenkins Environment Variables ==="
+          echo "CONSUL_HTTP_URL: ${env.CONSUL_HTTP_URL}"
+          echo "CONSUL_HTTP_KEY: ${env.CONSUL_HTTP_KEY}"
+          echo "CONSUL_HTTP_TOKEN: ${env.CONSUL_HTTP_TOKEN}"
+          echo "CONSUL_WATCH_INTERVAL_SECONDS: ${env.CONSUL_WATCH_INTERVAL_SECONDS}"
+          echo "IMAGE_NAME: ${env.IMAGE_NAME}"
+          echo "TARGET_BRANCH: ${env.TARGET_BRANCH}"
+          echo "BUILD_NUMBER: ${env.BUILD_NUMBER}"
+          echo "====================================="
+          
+          // Check if credentials are properly loaded
+          if (!env.CONSUL_HTTP_URL || env.CONSUL_HTTP_URL.trim() == '') {
+            error("CONSUL_HTTP_URL credential is not configured or empty!")
+          }
+          if (!env.CONSUL_HTTP_TOKEN || env.CONSUL_HTTP_TOKEN.trim() == '') {
+            error("CONSUL_HTTP_TOKEN credential is not configured or empty!")
+          }
+          if (!env.CONSUL_HTTP_KEY || env.CONSUL_HTTP_KEY.trim() == '') {
+            error("CONSUL_HTTP_KEY is not configured or empty!")
+          }
+          
+          echo "All required credentials are properly configured!"
+        }
+      }
+    }
+
     stage('Check Commit Message') {
       steps {
         script {
@@ -119,8 +148,22 @@ pipeline {
       steps {
         script {
           def targetDir = "/home/andreasuryatanaya/mini-soccer-project/user-service"
+          
+          echo "=== Deployment Debug Info ==="
+          echo "Target Directory: ${targetDir}"
+          echo "CONSUL_HTTP_URL: ${env.CONSUL_HTTP_URL}"
+          echo "CONSUL_HTTP_KEY: ${env.CONSUL_HTTP_KEY}"
+          echo "CONSUL_HTTP_TOKEN: ${env.CONSUL_HTTP_TOKEN}"
+          echo "TARGET_BRANCH: ${env.TARGET_BRANCH}"
+          echo "============================="
+          
           def sshCommandToServer = """
           ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${USERNAME}@${HOST} '
+            echo "=== Remote Server Debug ==="
+            echo "Current directory: \$(pwd)"
+            echo "Target directory: ${targetDir}"
+            echo "User: \$(whoami)"
+            
             if [ -d "${targetDir}/.git" ]; then
                 echo "Directory exists. Pulling latest changes."
                 cd "${targetDir}"
@@ -131,13 +174,22 @@ pipeline {
                 cd "${targetDir}"
             fi
 
+            echo "=== Current .env content (before changes) ==="
+            cat "${targetDir}/.env" || echo "No .env file found"
+            
+            echo "=== Copying .env.example to .env ==="
             cp .env.example .env
-            sed -i "s/^TIMEZONE=.*/TIMEZONE=Asia\\/Jakarta/" "${targetDir}/.env"
-            sed -i "s/^CONSUL_HTTP_URL=.*/CONSUL_HTTP_URL=${CONSUL_HTTP_URL}/" "${targetDir}/.env"
-            sed -i "s/^CONSUL_HTTP_PATH=.*/CONSUL_HTTP_PATH=backend\\/user-service/" "${targetDir}/.env"
-            sed -i "s/^CONSUL_HTTP_KEY=.*/CONSUL_HTTP_KEY=${CONSUL_HTTP_KEY}/" "${targetDir}/.env"
-            sed -i "s/^CONSUL_HTTP_TOKEN=.*/CONSUL_HTTP_TOKEN=${CONSUL_HTTP_TOKEN}/" "${targetDir}/.env"
-            sed -i "s/^CONSUL_WATCH_INTERVAL_SECONDS=.*/CONSUL_WATCH_INTERVAL_SECONDS=${CONSUL_WATCH_INTERVAL_SECONDS}/" "${targetDir}/.env"
+            
+            echo "=== Updating .env file ==="
+            sed -i "s/PLACEHOLDER_CONSUL_HTTP_URL/${CONSUL_HTTP_URL}/" "${targetDir}/.env"
+            sed -i "s/PLACEHOLDER_CONSUL_HTTP_KEY/${CONSUL_HTTP_KEY}/" "${targetDir}/.env"
+            sed -i "s/PLACEHOLDER_CONSUL_HTTP_TOKEN/${CONSUL_HTTP_TOKEN}/" "${targetDir}/.env"
+            sed -i "s/PLACEHOLDER_CONSUL_WATCH_INTERVAL_SECONDS/${CONSUL_WATCH_INTERVAL_SECONDS}/" "${targetDir}/.env"
+            
+            echo "=== Final .env content (after changes) ==="
+            cat "${targetDir}/.env"
+            
+            echo "=== Starting Docker containers ==="
             sudo docker compose up -d --build --force-recreate
           '
           """
