@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'update jenkins file test 5'
+git commit -m 'update jenkins file test 7'
 git push origin main
