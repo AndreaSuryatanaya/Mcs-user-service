@@ -1,5 +1,9 @@
 pipeline {
   agent any
+  
+  tools {
+    git 'Default' // This refers to the Git tool configured in Jenkins
+  }
 
   environment {
     IMAGE_NAME = 'user-service'
@@ -12,6 +16,8 @@ pipeline {
     CONSUL_HTTP_KEY = "backend/user-service"
     CONSUL_HTTP_TOKEN = credentials('consul-http-token')
     CONSUL_WATCH_INTERVAL_SECONDS = 60
+    PATH = "${env.PATH}:/usr/bin:/usr/local/bin"
+    GIT_EXECUTABLE = "/usr/bin/git"
   }
 
   stages {
@@ -19,10 +25,15 @@ pipeline {
       steps {
         script {
           try {
-            sh 'which git'
-            sh 'git --version'
+            sh 'echo "Checking Git installation..."'
+            sh 'which git || echo "Git not found in PATH"'
+            sh 'ls -la /usr/bin/git || echo "Git not found in /usr/bin"'
+            sh '/usr/bin/git --version || echo "Cannot execute git"'
+            sh 'echo "PATH: $PATH"'
+            sh 'echo "Current user: $(whoami)"'
           } catch (Exception e) {
-            error("Git is not installed or not in PATH. Please install Git on the Jenkins agent.")
+            echo "Git check failed: ${e.getMessage()}"
+            error("Git is not properly configured. Error: ${e.getMessage()}")
           }
         }
       }
@@ -32,7 +43,7 @@ pipeline {
       steps {
         script {
           def commitMessage = sh(
-            script: "git log -1 --pretty=%B",
+            script: "/usr/bin/git log -1 --pretty=%B",
             returnStdout: true
           ).trim()
 
@@ -121,13 +132,13 @@ pipeline {
       steps {
         script {
           sh """
-          git config --global user.name 'Jenkins CI'
-          git config --global user.email 'jenkins@company.com'
-          git remote set-url origin https://${GITHUB_CREDENTIALS_USR}:${GITHUB_CREDENTIALS_PSW}@github.com/AndreaSuryatanaya/Mcs-user-service.git
-          git add docker-compose.yaml
-          git commit -m 'Update image version to ${TARGET_BRANCH}-${currentBuild.number} [skip ci]' || echo 'No changes to commit'
-          git pull origin ${TARGET_BRANCH} --rebase
-          git push origin HEAD:${TARGET_BRANCH}
+          /usr/bin/git config --global user.name 'Jenkins CI'
+          /usr/bin/git config --global user.email 'jenkins@company.com'
+          /usr/bin/git remote set-url origin https://${GITHUB_CREDENTIALS_USR}:${GITHUB_CREDENTIALS_PSW}@github.com/AndreaSuryatanaya/Mcs-user-service.git
+          /usr/bin/git add docker-compose.yaml
+          /usr/bin/git commit -m 'Update image version to ${TARGET_BRANCH}-${currentBuild.number} [skip ci]' || echo 'No changes to commit'
+          /usr/bin/git pull origin ${TARGET_BRANCH} --rebase
+          /usr/bin/git push origin HEAD:${TARGET_BRANCH}
           """
         }
       }
@@ -142,10 +153,10 @@ pipeline {
             if [ -d "${targetDir}/.git" ]; then
                 echo "Directory exists. Pulling latest changes."
                 cd "${targetDir}"
-                git pull origin "${TARGET_BRANCH}"
+                /usr/bin/git pull origin "${TARGET_BRANCH}"
             else
                 echo "Directory does not exist. Cloning repository."
-                git clone -b "${TARGET_BRANCH}" https://github.com/AndreaSuryatanaya/Mcs-user-service.git "${targetDir}"
+                /usr/bin/git clone -b "${TARGET_BRANCH}" https://github.com/AndreaSuryatanaya/Mcs-user-service.git "${targetDir}"
                 cd "${targetDir}"
             fi
 
