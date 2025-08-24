@@ -15,6 +15,19 @@ pipeline {
   }
 
   stages {
+    stage('Check Git Installation') {
+      steps {
+        script {
+          try {
+            sh 'which git'
+            sh 'git --version'
+          } catch (Exception e) {
+            error("Git is not installed or not in PATH. Please install Git on the Jenkins agent.")
+          }
+        }
+      }
+    }
+
     stage('Check Commit Message') {
       steps {
         script {
@@ -54,16 +67,19 @@ pipeline {
     stage('Checkout Code') {
       steps {
         script {
-          def repoUrl = 'https://github.com/AndreaSuryatanaya/Mcs-user-service.git'
-
-          checkout([$class: 'GitSCM',
-            branches: [
-              [name: "*/${env.TARGET_BRANCH}"]
-            ],
-            userRemoteConfigs: [
-              [url: repoUrl, credentialsId: 'github-credential']
-            ]
-          ])
+          // Use Jenkins built-in git step instead of manual git commands
+          checkout scm
+          
+          // Alternative manual checkout if needed
+          // def repoUrl = 'https://github.com/AndreaSuryatanaya/Mcs-user-service.git'
+          // checkout([$class: 'GitSCM',
+          //   branches: [
+          //     [name: "*/${env.TARGET_BRANCH}"]
+          //   ],
+          //   userRemoteConfigs: [
+          //     [url: repoUrl, credentialsId: 'github-credential']
+          //   ]
+          // ])
 
           sh 'ls -lah'
         }
