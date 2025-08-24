@@ -1,4 +1,4 @@
 git add .
 git status
-git commit -m 'deploy user-service'
+git commit -m 'update jenkins file test'
 git push origin main
