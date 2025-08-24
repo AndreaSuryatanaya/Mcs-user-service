@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var command = *&cobra.Command{
+var command = cobra.Command{
 	Use:   "serve",
 	Short: "Start the server",
 	Run: func(c *cobra.Command, args []string) {
@@ -64,13 +64,17 @@ var command = *&cobra.Command{
 		router.GET("/", func(c *gin.Context) {
 			c.JSON(http.StatusOK, response.Response{
 				Status:  constants.Error,
-				Message: "Welcom to User Service",
+				Message: "Welcome to User Service",
 			})
 		})
 		router.Use(func(c *gin.Context) {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-			c.Writer.Header().Set("Access-Control-ALlow-Methods", "GET, POST, PUT")
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH")
 			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, x-service-name, x-api-key, x-request-at")
+			if c.Request.Method == "OPTIONS" {
+				c.AbortWithStatus(http.StatusNoContent)
+				return
+			}
 			c.Next()
 		})
 
