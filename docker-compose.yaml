@@ -2,7 +2,7 @@ name: booking-order-app
 services:
     user-service:
         container_name: user-service
-        image: andreasuryatanaya/user-service:17
+        image: andreasuryatanaya/user-service:19
         ports:
             - "8001:8001"
         env_file:
